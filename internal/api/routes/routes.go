@@ -24,5 +24,6 @@ func Register(r *gin.Engine, cfg *configs.Config, db *gorm.DB) {
 	users := v1.Group("/users")
 	{
 		users.GET("", userHandler.GetAll)
+		users.GET("/:id", userHandler.GetById)
 	}
 }

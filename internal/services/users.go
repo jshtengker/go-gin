@@ -22,21 +22,15 @@ func (s *UserService) GetAll(ctx context.Context) ([]responses.UserResponse, err
 		return nil, err
 	}
 
-	userResponses := make([]responses.UserResponse, 0, len(users))
+	return responses.ToUsersResponse(users), nil
+}
 
-	for _, user := range users {
-		userResponses = append(userResponses, responses.UserResponse{
-			ID:          user.ID,
-			FullName:    user.FullName,
-			Username:    user.Username,
-			Email:       user.Email,
-			PhoneNumber: user.PhoneNumber,
-			IsVerified:  user.IsVerified,
-			IsActive:    user.IsActive,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   user.UpdatedAt,
-		})
+func (s *UserService) GetById(ctx context.Context, user_id string) (*responses.UserResponse, error) {
+	user, err := s.repo.FindById(ctx, user_id)
+	if err != nil {
+		return nil, err
 	}
 
-	return userResponses, nil
+	return responses.ToUserResponse(user), nil
+
 }
