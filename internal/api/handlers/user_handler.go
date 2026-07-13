@@ -23,7 +23,9 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 }
 
 func (h *UserHandler) GetAll(c *gin.Context) {
-	users, err := h.service.GetAll(c.Request.Context())
+	pagination := helpers.ParsePagination(c)
+
+	users, total, err := h.service.GetAll(c.Request.Context(), pagination)
 	if err != nil {
 		helpers.ErrorResponse(
 			c,
@@ -33,10 +35,16 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 		return
 	}
 
+	data := helpers.BuildPagination(
+		pagination,
+		total,
+		users,
+	)
+
 	helpers.SuccessResponse(
 		c,
 		http.StatusOK,
-		users,
+		data,
 		"Users retrieved successfully",
 	)
 }
@@ -44,7 +52,6 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 func (h *UserHandler) GetById(c *gin.Context) {
 	userID := c.Param("id")
 
-	// Validate UUID
 	if _, err := uuid.Parse(userID); err != nil {
 		helpers.ErrorResponse(
 			c,

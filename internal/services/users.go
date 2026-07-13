@@ -3,6 +3,7 @@ package services
 import (
 	"backend/internal/api/responses"
 	"backend/internal/repositories"
+	"backend/pkg/helpers"
 	"context"
 )
 
@@ -16,13 +17,13 @@ func NewUserService(repo *repositories.UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) GetAll(ctx context.Context) ([]responses.UserResponse, error) {
-	users, err := s.repo.FindAll(ctx)
+func (s *UserService) GetAll(ctx context.Context, pagination helpers.PaginationParams) ([]responses.UserResponse, int64, error) {
+	users, total, err := s.repo.FindAll(ctx, pagination)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return responses.ToUsersResponse(users), nil
+	return responses.ToUsersResponse(users), total, nil
 }
 
 func (s *UserService) GetById(ctx context.Context, user_id string) (*responses.UserResponse, error) {
