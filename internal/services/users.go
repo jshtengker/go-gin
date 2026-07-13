@@ -3,6 +3,7 @@ package services
 import (
 	"backend/internal/api/responses"
 	"backend/internal/repositories"
+	"backend/pkg/helpers"
 	"context"
 )
 
@@ -16,27 +17,21 @@ func NewUserService(repo *repositories.UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) GetAll(ctx context.Context) ([]responses.UserResponse, error) {
-	users, err := s.repo.FindAll(ctx)
+func (s *UserService) GetAll(ctx context.Context, pagination helpers.PaginationParams) ([]responses.UserResponse, int64, error) {
+	users, total, err := s.repo.FindAll(ctx, pagination)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return responses.ToUsersResponse(users), total, nil
+}
+
+func (s *UserService) GetById(ctx context.Context, user_id string) (*responses.UserResponse, error) {
+	user, err := s.repo.FindById(ctx, user_id)
 	if err != nil {
 		return nil, err
 	}
 
-	userResponses := make([]responses.UserResponse, 0, len(users))
+	return responses.ToUserResponse(user), nil
 
-	for _, user := range users {
-		userResponses = append(userResponses, responses.UserResponse{
-			ID:          user.ID,
-			FullName:    user.FullName,
-			Username:    user.Username,
-			Email:       user.Email,
-			PhoneNumber: user.PhoneNumber,
-			IsVerified:  user.IsVerified,
-			IsActive:    user.IsActive,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   user.UpdatedAt,
-		})
-	}
-
-	return userResponses, nil
 }

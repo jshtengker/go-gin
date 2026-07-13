@@ -1,36 +1,35 @@
 package handlers
 
 import (
-	"errors"
-	"net/http"
-
 	"backend/internal/services"
 	"backend/pkg/helpers"
+	"errors"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type UserHandler struct {
-	service *services.UserService
+type ProductHandler struct {
+	service *services.ProductService
 }
 
-func NewUserHandler(service *services.UserService) *UserHandler {
-	return &UserHandler{
+func NewProductHandler(service *services.ProductService) *ProductHandler {
+	return &ProductHandler{
 		service: service,
 	}
 }
 
-func (h *UserHandler) GetAll(c *gin.Context) {
+func (h *ProductHandler) GetAll(c *gin.Context) {
 	pagination := helpers.ParsePagination(c)
 
-	users, total, err := h.service.GetAll(c.Request.Context(), pagination)
+	products, total, err := h.service.GetAll(c.Request.Context(), pagination)
 	if err != nil {
 		helpers.ErrorResponse(
 			c,
 			http.StatusInternalServerError,
-			"Failed to retrieve users",
+			"Failed to retrieve products",
 		)
 		return
 	}
@@ -38,37 +37,37 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 	data := helpers.BuildPagination(
 		pagination,
 		total,
-		users,
+		products,
 	)
 
 	helpers.SuccessResponse(
 		c,
 		http.StatusOK,
 		data,
-		"Users retrieved successfully",
+		"Products retrieved successfully",
 	)
 }
 
-func (h *UserHandler) GetById(c *gin.Context) {
-	userID := c.Param("id")
+func (h *ProductHandler) GetById(c *gin.Context) {
+	productID := c.Param("id")
 
-	if _, err := uuid.Parse(userID); err != nil {
+	if _, err := uuid.Parse(productID); err != nil {
 		helpers.ErrorResponse(
 			c,
 			http.StatusBadRequest,
-			"Invalid user ID",
+			"Invalid product ID",
 			nil,
 		)
 		return
 	}
 
-	user, err := h.service.GetById(c.Request.Context(), userID)
+	product, err := h.service.GetById(c.Request.Context(), productID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			helpers.ErrorResponse(
 				c,
 				http.StatusNotFound,
-				"User not found",
+				"Product not found",
 				nil,
 			)
 			return
@@ -77,7 +76,7 @@ func (h *UserHandler) GetById(c *gin.Context) {
 		helpers.ErrorResponse(
 			c,
 			http.StatusInternalServerError,
-			"Failed to get user",
+			"Failed to get product",
 			nil,
 		)
 		return
@@ -86,7 +85,7 @@ func (h *UserHandler) GetById(c *gin.Context) {
 	helpers.SuccessResponse(
 		c,
 		http.StatusOK,
-		user,
-		"User retrieved successfully",
+		product,
+		"Product retrieved Successfully",
 	)
 }

@@ -8,7 +8,7 @@ type Response struct {
 	Status  int    `json:"status"`
 	Message string `json:"message"`
 	Data    any    `json:"data"`
-	Errors  any    `json:"errors"`
+	Errors  any    `json:"errors,omitempty"`
 }
 
 func SuccessResponse(c *gin.Context, statusCode int, data any, message ...string) {

@@ -53,30 +53,9 @@ func main() {
 
 	r := router.Setup(cfg, db)
 
-	log.Println("Server started on :8080")
+	log.Println("Server started on :9001")
 
-	if err := r.Run(":8080"); err != nil {
+	if err := r.Run(":9001"); err != nil {
 		log.Fatal(err)
 	}
-
-	// r := gin.Default()
-
-	// basicAuth := gin.BasicAuth(gin.Accounts{
-	// 	"user":"pass",
-	// })
-
-	// r.GET("/getDataQuery", getDataQuery)
-
-	// v1 := r.Group("/v1", middlewares.Authenticate(), basicAuth)
-	// {
-	// 	v1.GET("/getData", getData)
-	// }
-
-	// v2 := r.Group("/v2")
-	// {
-	// 	v2.GET("/getDataParam/:name/:age", getDataParam)
-	// }
-
-	// r.Run(":9090")
-
 }
