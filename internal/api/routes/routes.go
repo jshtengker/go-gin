@@ -33,5 +33,7 @@ func Register(r *gin.Engine, cfg *configs.Config, db *gorm.DB) {
 	products := v1.Group("/products")
 	{
 		products.GET("", productHandler.GetAll)
+		products.GET("/:id", productHandler.GetById)
+
 	}
 }

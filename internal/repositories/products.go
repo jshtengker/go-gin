@@ -35,3 +35,14 @@ func (r *ProductRepository) FindAll(ctx context.Context, pagination helpers.Pagi
 	return products, total, nil
 
 }
+
+func (r *ProductRepository) FindById(ctx context.Context, product_id string) (*models.Products, error) {
+	var product models.Products
+
+	err := r.db.WithContext(ctx).Where("id = ?", product_id).First(&product).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &product, nil
+}

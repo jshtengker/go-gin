@@ -25,3 +25,12 @@ func (s *ProductService) GetAll(ctx context.Context, pagination helpers.Paginati
 
 	return responses.ToProductsResponse(products), total, nil
 }
+
+func (s *ProductService) GetById(ctx context.Context, product_id string) (*responses.ProductResponse, error) {
+	product, err := s.repo.FindById(ctx, product_id)
+	if err != nil {
+		return nil, err
+	}
+
+	return responses.ToProductResponse(product), nil
+}
