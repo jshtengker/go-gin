@@ -19,6 +19,9 @@ func Register(r *gin.Engine, cfg *configs.Config, db *gorm.DB) {
 	productRepo := repositories.NewProductRepository(db)
 	productService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(productService)
+	orderRepo := repositories.NewOrderRepository(db)
+	orderService := services.NewOrderService(orderRepo)
+	orderHandler := handlers.NewOrderHandler(orderService)
 
 	// API Versioning
 	v1 := r.Group("/v1")
@@ -35,5 +38,11 @@ func Register(r *gin.Engine, cfg *configs.Config, db *gorm.DB) {
 		products.GET("", productHandler.GetAll)
 		products.GET("/:id", productHandler.GetById)
 
+	}
+
+	orders := v1.Group("/orders")
+	{
+		orders.GET("", orderHandler.GetAll)
+		orders.GET("/:id", orderHandler.GetById)
 	}
 }

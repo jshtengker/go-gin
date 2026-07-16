@@ -5,6 +5,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func ConnPostgres(cfg *Config) (*gorm.DB, error) {
@@ -13,16 +14,18 @@ func ConnPostgres(cfg *Config) (*gorm.DB, error) {
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName,
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil{
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	if err != nil {
 		return nil, fmt.Errorf("unnable to connect to database: %w", err)
 	}
 
 	sqlDB, err := db.DB()
-	if err != nil{
+	if err != nil {
 		return nil, fmt.Errorf("unable to get the underlying sql.DB: %w", err)
 	}
-	if err := sqlDB.Ping(); err != nil{
+	if err := sqlDB.Ping(); err != nil {
 		return nil, fmt.Errorf("unable to ping database: %w", err)
 	}
 
