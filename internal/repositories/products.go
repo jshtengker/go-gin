@@ -8,6 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// Products
+
 type ProductRepository struct {
 	db *gorm.DB
 }
