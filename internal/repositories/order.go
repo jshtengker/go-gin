@@ -34,7 +34,7 @@ func (r *OrderRepository) FindAll(ctx context.Context, pagination helpers.Pagina
 		Select(`
 		orders.id,
 		orders.user_id,
-		orders.shipping_address_id,
+	 	orders.shipping_address_id,	
 		orders.order_number,
 		orders.status,
 		orders.total_amount,
