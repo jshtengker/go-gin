@@ -1,29 +1,29 @@
 package handlers
 
 import (
+	"backend/internal/api/responses"
+	"backend/internal/interfaces"
+	"backend/pkg/apperrors"
+	"backend/pkg/helpers"
 	"errors"
 	"net/http"
 
-	"backend/internal/services"
-	"backend/pkg/helpers"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type UserHandler struct {
-	service *services.UserService
+	service interfaces.UserService
 }
 
-func NewUserHandler(service *services.UserService) *UserHandler {
+func NewUserHandler(service interfaces.UserService) *UserHandler {
 	return &UserHandler{
 		service: service,
 	}
 }
 
 func (h *UserHandler) GetAll(c *gin.Context) {
-	pagination := helpers.ParsePagination(c)
+	pagination := responses.ParsePagination(c)
 
 	users, total, err := h.service.GetAll(c.Request.Context(), pagination)
 	if err != nil {
@@ -35,7 +35,7 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	data := helpers.BuildPagination(
+	data := responses.BuildPagination(
 		pagination,
 		total,
 		users,
@@ -49,7 +49,7 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 	)
 }
 
-func (h *UserHandler) GetById(c *gin.Context) {
+func (h *UserHandler) GetByID(c *gin.Context) {
 	userID := c.Param("id")
 
 	if _, err := uuid.Parse(userID); err != nil {
@@ -62,9 +62,9 @@ func (h *UserHandler) GetById(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.GetById(c.Request.Context(), userID)
+	user, err := h.service.GetByID(c.Request.Context(), userID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, apperrors.ErrNotFound) {
 			helpers.ErrorResponse(
 				c,
 				http.StatusNotFound,

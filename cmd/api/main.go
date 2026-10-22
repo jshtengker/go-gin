@@ -1,61 +1,69 @@
 package main
 
 import (
-	"backend/internal/api/requests"
 	"backend/internal/api/router"
 	"backend/internal/configs"
-	"log"
+	"backend/pkg/logger"
+	"context"
+	"errors"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-func getData(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "ok",
-	})
-}
-
-func getDataParam(c *gin.Context) {
-	name := c.Param("name")
-	age := c.Param("age")
-	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"name":    name,
-		"age":     age,
-	})
-}
-
-func getDataQuery(c *gin.Context) {
-	name := c.Query("name")
-	age := c.Query("age")
-	c.JSON(http.StatusOK, requests.APIResponse{
-		Success: true,
-		Message: "user found",
-		Data: requests.User{
-			Name: name,
-			Age:  age,
-		},
-	})
-}
-
 func main() {
+	log := logger.Init()
+	defer logger.Sync()
 
 	configs.LoadEnv()
-
 	cfg := configs.Load()
 
 	db, err := configs.ConnPostgres(cfg)
 	if err != nil {
-		log.Fatalf("failed to connect to PostgreSQL: %v", err)
+		log.Fatal("failed to connect to PostgreSQL", zap.Error(err))
 	}
-	log.Println("connected to PostgreSQL")
+	log.Info("connected to PostgreSQL")
 
 	r := router.Setup(cfg, db)
 
-	log.Println("Server started on :9001")
-
-	if err := r.Run(":9001"); err != nil {
-		log.Fatal(err)
+	port := cfg.ServerPort
+	if port == "" {
+		port = "9001"
 	}
+
+	srv := &http.Server{
+		Addr:         ":" + port,
+		Handler:      r,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	// Run server in a background goroutine
+	go func() {
+		log.Info("server starting", zap.String("port", port))
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal("server listen error", zap.Error(err))
+		}
+	}()
+
+	// Listen for OS interrupt or termination signals for graceful shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	log.Info("shutting down server gracefully")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("server forced to shutdown", zap.Error(err))
+	}
+
+	log.Info("server exited cleanly")
 }

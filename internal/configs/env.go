@@ -16,7 +16,7 @@ type Config struct {
 }
 
 func LoadEnv() {
-	godotenv.Load("internal/configs/.env")
+	_ = godotenv.Load("internal/configs/.env")
 }
 
 func Load() *Config {

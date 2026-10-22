@@ -1,28 +1,29 @@
 package handlers
 
 import (
-	"backend/internal/services"
+	"backend/internal/api/responses"
+	"backend/internal/interfaces"
+	"backend/pkg/apperrors"
 	"backend/pkg/helpers"
 	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type ProductHandler struct {
-	service *services.ProductService
+	service interfaces.ProductService
 }
 
-func NewProductHandler(service *services.ProductService) *ProductHandler {
+func NewProductHandler(service interfaces.ProductService) *ProductHandler {
 	return &ProductHandler{
 		service: service,
 	}
 }
 
 func (h *ProductHandler) GetAll(c *gin.Context) {
-	pagination := helpers.ParsePagination(c)
+	pagination := responses.ParsePagination(c)
 
 	products, total, err := h.service.GetAll(c.Request.Context(), pagination)
 	if err != nil {
@@ -34,7 +35,7 @@ func (h *ProductHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	data := helpers.BuildPagination(
+	data := responses.BuildPagination(
 		pagination,
 		total,
 		products,
@@ -48,7 +49,7 @@ func (h *ProductHandler) GetAll(c *gin.Context) {
 	)
 }
 
-func (h *ProductHandler) GetById(c *gin.Context) {
+func (h *ProductHandler) GetByID(c *gin.Context) {
 	productID := c.Param("id")
 
 	if _, err := uuid.Parse(productID); err != nil {
@@ -61,9 +62,9 @@ func (h *ProductHandler) GetById(c *gin.Context) {
 		return
 	}
 
-	product, err := h.service.GetById(c.Request.Context(), productID)
+	product, err := h.service.GetByID(c.Request.Context(), productID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, apperrors.ErrNotFound) {
 			helpers.ErrorResponse(
 				c,
 				http.StatusNotFound,
@@ -86,6 +87,6 @@ func (h *ProductHandler) GetById(c *gin.Context) {
 		c,
 		http.StatusOK,
 		product,
-		"Product retrieved Successfully",
+		"Product retrieved successfully",
 	)
 }
