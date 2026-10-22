@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"backend/pkg/helpers"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,14 +9,11 @@ import (
 
 func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !(c.Request.Header.Get("Token") == "auth"){
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"success": false,
-				"message": "token not found",
-			})
+		if c.Request.Header.Get("Token") != "auth" {
+			helpers.ErrorResponse(c, http.StatusUnauthorized, "Token not found or invalid")
+			c.Abort()
 			return
 		}
 		c.Next()
 	}
 }
-

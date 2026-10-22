@@ -2,16 +2,16 @@ package services
 
 import (
 	"backend/internal/api/responses"
-	"backend/internal/repositories"
+	"backend/internal/interfaces"
 	"backend/pkg/helpers"
 	"context"
 )
 
 type UserService struct {
-	repo *repositories.UserRepository
+	repo interfaces.UserRepository
 }
 
-func NewUserService(repo *repositories.UserRepository) *UserService {
+func NewUserService(repo interfaces.UserRepository) *UserService {
 	return &UserService{
 		repo: repo,
 	}
@@ -26,12 +26,11 @@ func (s *UserService) GetAll(ctx context.Context, pagination helpers.PaginationP
 	return responses.ToUsersResponse(users), total, nil
 }
 
-func (s *UserService) GetById(ctx context.Context, user_id string) (*responses.UserResponse, error) {
-	user, err := s.repo.FindById(ctx, user_id)
+func (s *UserService) GetByID(ctx context.Context, userID string) (*responses.UserResponse, error) {
+	user, err := s.repo.FindByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	return responses.ToUserResponse(user), nil
-
 }

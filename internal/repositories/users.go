@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"backend/internal/models"
+	"backend/pkg/apperrors"
 	"backend/pkg/helpers"
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -28,28 +30,23 @@ func (r *UserRepository) FindAll(ctx context.Context, pagination helpers.Paginat
 		return nil, 0, err
 	}
 
-	// functionally the same, diff approach - the 'err' could be used elsewhere later
-	// err := query.Count(&total).Error
-	// if err != nil {
-	// 	return nil, 0, err
-	// }
-
 	if err := query.Limit(pagination.PageSize).Offset(pagination.Offset).Find(&users).Error; err != nil {
 		return nil, 0, err
 	}
 
 	return users, total, nil
-
 }
 
-func (r *UserRepository) FindById(ctx context.Context, user_id string) (*models.User, error) {
+func (r *UserRepository) FindByID(ctx context.Context, userID string) (*models.User, error) {
 	var user models.User
 
-	err := r.db.WithContext(ctx).Where("id = ?", user_id).First(&user).Error
+	err := r.db.WithContext(ctx).Where("id = ?", userID).First(&user).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, apperrors.ErrNotFound
+		}
 		return nil, err
 	}
 
 	return &user, nil
-
 }

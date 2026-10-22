@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=none
+
+run:
+  timeout: 5m
+  go: "1.25"
+
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - ineffassign
+    - gosec
+    - revive
+    - misspell
+    - prealloc
+    - unconvert
+
+linters-settings:
+  govet:
+    disable:
+      - fieldalignment
+  gosec:
+    excludes:
+      - G104
+  revive:
+    rules:
+      - name: exported
+        disabled: true
+      - name: package-comments
+        disabled: true
+      - name: var-naming
+        disabled: false
+      - name: indent-error-flow
+        disabled: false
+      - name: empty-block
+        disabled: false
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

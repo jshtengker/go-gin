@@ -63,3 +63,33 @@ func ToOrdersResponse(orders []models.Orders) []OrderResponse {
 
 	return responses
 }
+
+func ToOrderListResponses(items []models.OrderListItem) []OrderListResponse {
+	responses := make([]OrderListResponse, 0, len(items))
+
+	for _, item := range items {
+		responses = append(responses, OrderListResponse{
+			ID:                item.ID,
+			UserID:            item.UserID,
+			UserFullName:      item.UserFullName,
+			Username:          item.Username,
+			UserEmail:         item.UserEmail,
+			ShippingAddressID: item.ShippingAddressID,
+			Phone:             item.Phone,
+			AddressLine:       item.AddressLine,
+			City:              item.City,
+			Province:          item.Province,
+			PostalCode:        item.PostalCode,
+			Country:           item.Country,
+			OrderNumber:       item.OrderNumber,
+			Status:            item.Status,
+			TotalAmount:       item.TotalAmount,
+			OrderedAt:         item.OrderedAt,
+			CreatedAt:         item.CreatedAt,
+			UpdatedAt:         item.UpdatedAt,
+		})
+	}
+
+	return responses
+}
+

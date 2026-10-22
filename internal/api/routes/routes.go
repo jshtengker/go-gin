@@ -30,19 +30,18 @@ func Register(api *gin.RouterGroup, cfg *configs.Config, db *gorm.DB) {
 	users := v1.Group("/users")
 	{
 		users.GET("", userHandler.GetAll)
-		users.GET("/:id", userHandler.GetById)
+		users.GET("/:id", userHandler.GetByID)
 	}
 
 	products := v1.Group("/products")
 	{
 		products.GET("", productHandler.GetAll)
-		products.GET("/:id", productHandler.GetById)
-
+		products.GET("/:id", productHandler.GetByID)
 	}
 
 	orders := v1.Group("/orders")
 	{
 		orders.GET("", orderHandler.GetAll)
-		orders.GET("/:id", orderHandler.GetById)
+		orders.GET("/:id", orderHandler.GetByID)
 	}
 }

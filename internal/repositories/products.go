@@ -2,13 +2,13 @@ package repositories
 
 import (
 	"backend/internal/models"
+	"backend/pkg/apperrors"
 	"backend/pkg/helpers"
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 )
-
-// Products
 
 type ProductRepository struct {
 	db *gorm.DB
@@ -35,14 +35,16 @@ func (r *ProductRepository) FindAll(ctx context.Context, pagination helpers.Pagi
 	}
 
 	return products, total, nil
-
 }
 
-func (r *ProductRepository) FindById(ctx context.Context, product_id string) (*models.Products, error) {
+func (r *ProductRepository) FindByID(ctx context.Context, productID string) (*models.Products, error) {
 	var product models.Products
 
-	err := r.db.WithContext(ctx).Where("id = ?", product_id).First(&product).Error
+	err := r.db.WithContext(ctx).Where("id = ?", productID).First(&product).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, apperrors.ErrNotFound
+		}
 		return nil, err
 	}
 

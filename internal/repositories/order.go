@@ -1,10 +1,11 @@
 package repositories
 
 import (
-	"backend/internal/api/responses"
 	"backend/internal/models"
+	"backend/pkg/apperrors"
 	"backend/pkg/helpers"
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -19,8 +20,8 @@ func NewOrderRepository(db *gorm.DB) *OrderRepository {
 	}
 }
 
-func (r *OrderRepository) FindAll(ctx context.Context, pagination helpers.PaginationParams) ([]responses.OrderListResponse, int64, error) {
-	var orders []responses.OrderListResponse
+func (r *OrderRepository) FindAll(ctx context.Context, pagination helpers.PaginationParams) ([]models.OrderListItem, int64, error) {
+	var orders []models.OrderListItem
 	var total int64
 
 	if err := r.db.WithContext(ctx).
@@ -62,15 +63,18 @@ func (r *OrderRepository) FindAll(ctx context.Context, pagination helpers.Pagina
 	return orders, total, nil
 }
 
-func (r *OrderRepository) FindById(ctx context.Context, order_id string) (*models.Orders, error) {
+func (r *OrderRepository) FindByID(ctx context.Context, orderID string) (*models.Orders, error) {
 	var order models.Orders
 
 	err := r.db.
 		WithContext(ctx).
-		Where("id = ?", order_id).
+		Where("id = ?", orderID).
 		First(&order).Error
 
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, apperrors.ErrNotFound
+		}
 		return nil, err
 	}
 

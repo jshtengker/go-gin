@@ -2,33 +2,32 @@ package services
 
 import (
 	"backend/internal/api/responses"
-	"backend/internal/repositories"
+	"backend/internal/interfaces"
 	"backend/pkg/helpers"
 	"context"
 )
 
 type OrderService struct {
-	repo *repositories.OrderRepository
+	repo interfaces.OrderRepository
 }
 
-func NewOrderService(repo *repositories.OrderRepository) *OrderService {
+func NewOrderService(repo interfaces.OrderRepository) *OrderService {
 	return &OrderService{
 		repo: repo,
 	}
 }
 
 func (s *OrderService) GetAll(ctx context.Context, pagination helpers.PaginationParams) ([]responses.OrderListResponse, int64, error) {
-	orders, total, err := s.repo.FindAll(ctx, pagination)
+	items, total, err := s.repo.FindAll(ctx, pagination)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return orders, total, nil
-
+	return responses.ToOrderListResponses(items), total, nil
 }
 
-func (s *OrderService) GetById(ctx context.Context, order_id string) (*responses.OrderResponse, error) {
-	order, err := s.repo.FindById(ctx, order_id)
+func (s *OrderService) GetByID(ctx context.Context, orderID string) (*responses.OrderResponse, error) {
+	order, err := s.repo.FindByID(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
