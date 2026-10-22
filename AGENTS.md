@@ -35,7 +35,7 @@ Clean architecture: `handler → service → repository`.
 
 ## API
 
-- Versioned under `/v1` — e.g. `/v1/users`, `/v1/products`, `/v1/orders`
+- Versioned under `/api/v1` — e.g. `/api/v1/users`, `/api/v1/products`, `/api/v1/orders`
 - **Only GET endpoints exist** — `GetAll` (paginated) and `GetById` per resource
 - Pagination via `?page=1&page_size=10` (default page=1, page_size=10, max 100)
 - Response shape: `{"error":bool,"status":int,"message":string,"data":any,"errors":any}`

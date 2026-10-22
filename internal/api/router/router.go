@@ -11,7 +11,8 @@ import (
 func Setup(cfg *configs.Config, db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 
-	routes.Register(r, cfg, db)
+	api := r.Group("/api")
+	routes.Register(api, cfg, db)
 
 	return r
 }

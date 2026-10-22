@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func Register(r *gin.Engine, cfg *configs.Config, db *gorm.DB) {
+func Register(api *gin.RouterGroup, cfg *configs.Config, db *gorm.DB) {
 
 	// Dependencies
 	userRepo := repositories.NewUserRepository(db)
@@ -24,7 +24,7 @@ func Register(r *gin.Engine, cfg *configs.Config, db *gorm.DB) {
 	orderHandler := handlers.NewOrderHandler(orderService)
 
 	// API Versioning
-	v1 := r.Group("/v1")
+	v1 := api.Group("/v1")
 
 	// User Routes
 	users := v1.Group("/users")
