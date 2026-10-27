@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -49,4 +50,53 @@ func (r *UserRepository) FindByID(ctx context.Context, userID string) (*models.U
 	}
 
 	return &user, nil
+}
+
+func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
+	var user models.User
+
+	err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, apperrors.ErrNotFound
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *UserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
+	var user models.User
+
+	err := r.db.WithContext(ctx).Where("username = ?", username).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, apperrors.ErrNotFound
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *UserRepository) FindByEmailOrUsername(ctx context.Context, identifier string) (*models.User, error) {
+	var user models.User
+
+	err := r.db.WithContext(ctx).Where("email = ? OR username = ?", identifier, identifier).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, apperrors.ErrNotFound
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *UserRepository) Create(ctx context.Context, user *models.User) error {
+	if user.ID == uuid.Nil {
+		user.ID = uuid.New()
+	}
+	return r.db.WithContext(ctx).Create(user).Error
 }

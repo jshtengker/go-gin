@@ -39,6 +39,10 @@ func JSONLogger() gin.HandlerFunc {
 			fields = append(fields, zap.String("error", c.Errors.String()))
 		}
 
+		if logger.Log == nil {
+			return
+		}
+
 		msg := "HTTP Request"
 		switch {
 		case status >= 500:
