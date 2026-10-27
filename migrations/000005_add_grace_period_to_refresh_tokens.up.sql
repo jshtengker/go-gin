@@ -1,0 +1,3 @@
+ALTER TABLE refresh_tokens 
+ADD COLUMN IF NOT EXISTS revoked_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS revocation_reason VARCHAR(50);
