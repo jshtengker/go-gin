@@ -33,7 +33,6 @@ func TestAuthFlow_Integration(t *testing.T) {
 	testUsername := fmt.Sprintf("user_%d", uniqueID)
 	testPassword := "SuperSecret123!"
 
-	// Cleanup test user and associated cascade data when test completes
 	t.Cleanup(func() {
 		db.Exec("DELETE FROM users WHERE email = ?", testEmail)
 	})
@@ -66,7 +65,6 @@ func TestAuthFlow_Integration(t *testing.T) {
 		regRefreshToken, ok := regRes.Data["refresh_token"].(string)
 		require.True(t, ok && regRefreshToken != "", "expected refresh token in register response")
 
-		// Verify directly in PostgreSQL that user was created
 		var dbUser models.User
 		err = db.Where("email = ?", testEmail).First(&dbUser).Error
 		require.NoError(t, err, "user should exist in postgres")
@@ -133,7 +131,6 @@ func TestAuthFlow_Integration(t *testing.T) {
 	})
 
 	t.Run("5_ConcurrentRequest_GracePeriod", func(t *testing.T) {
-		// Sending loginRefreshToken again immediately (simulating concurrent frontend requests within 30s grace period)
 		body, _ := json.Marshal(requests.RefreshTokenRequest{RefreshToken: loginRefreshToken})
 		req, _ := http.NewRequest(http.MethodPost, "/api/v1/auth/refresh", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -152,7 +149,7 @@ func TestAuthFlow_Integration(t *testing.T) {
 	})
 
 	t.Run("6_TokenReuseDetection_Attack", func(t *testing.T) {
-		// Simulate expired grace period: age the revoked_at timestamp back by 2 minutes directly in DB
+		// Age revoked_at past grace period to test replay attack detection without sleeping.
 		loginHash := security.HashToken(loginRefreshToken)
 		expiredGraceTime := time.Now().UTC().Add(-2 * time.Minute)
 		err := db.Model(&models.RefreshToken{}).
@@ -160,7 +157,6 @@ func TestAuthFlow_Integration(t *testing.T) {
 			Update("revoked_at", expiredGraceTime).Error
 		require.NoError(t, err)
 
-		// Replay the old token after grace period has expired -> should trigger reuse attack detection
 		body, _ := json.Marshal(requests.RefreshTokenRequest{RefreshToken: loginRefreshToken})
 		req, _ := http.NewRequest(http.MethodPost, "/api/v1/auth/refresh", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -168,7 +164,6 @@ func TestAuthFlow_Integration(t *testing.T) {
 		w := executeRequest(app, req)
 		assert.Equal(t, http.StatusUnauthorized, w.Code, "expected 401 Unauthorized on reusing old refresh token after grace period")
 
-		// Verify security lockout: rotatedRefreshToken should now be revoked due to reuse attack!
 		rotatedHash := security.HashToken(rotatedRefreshToken)
 		var rotatedRecord models.RefreshToken
 		err = db.Where("token_hash = ?", rotatedHash).First(&rotatedRecord).Error
@@ -177,7 +172,6 @@ func TestAuthFlow_Integration(t *testing.T) {
 	})
 
 	t.Run("7_Logout", func(t *testing.T) {
-		// Log in freshly to obtain active session
 		loginReq := requests.LoginRequest{
 			Identifier: testEmail,
 			Password:   testPassword,
@@ -194,7 +188,6 @@ func TestAuthFlow_Integration(t *testing.T) {
 		freshAccessToken := loginRes.Data["access_token"].(string)
 		freshRefreshToken := loginRes.Data["refresh_token"].(string)
 
-		// Execute Logout
 		logoutReq := requests.LogoutRequest{
 			RefreshToken: freshRefreshToken,
 		}
@@ -206,7 +199,6 @@ func TestAuthFlow_Integration(t *testing.T) {
 		w = executeRequest(app, req)
 		assert.Equal(t, http.StatusOK, w.Code, "expected 200 OK on logout")
 
-		// Attempting to refresh with logged-out token fails immediately (no grace period for logouts!)
 		refreshBody, _ := json.Marshal(requests.RefreshTokenRequest{RefreshToken: freshRefreshToken})
 		req, _ = http.NewRequest(http.MethodPost, "/api/v1/auth/refresh", bytes.NewBuffer(refreshBody))
 		req.Header.Set("Content-Type", "application/json")

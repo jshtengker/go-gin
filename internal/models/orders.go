@@ -17,7 +17,6 @@ type Orders struct {
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	User              User `gorm:"foreignKey:UserID;references:ID"`
-	// ShippingAddress   Address `gorm:"foreignKey:ShippingAddressID;references:ID"`
 }
 
 type OrderListItem struct {

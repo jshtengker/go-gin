@@ -17,7 +17,6 @@ func ConnPostgres(cfg *Config) (*gorm.DB, error) {
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName,
 	)
 
-	// Only log slow queries (> 200ms) and database errors
 	dbLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
@@ -43,7 +42,6 @@ func ConnPostgres(cfg *Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("unable to ping database: %w", err)
 	}
 
-	// Connection Pool Hardening
 	sqlDB.SetMaxOpenConns(25)
 	sqlDB.SetMaxIdleConns(25)
 	sqlDB.SetConnMaxLifetime(5 * time.Minute)

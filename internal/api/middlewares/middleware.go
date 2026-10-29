@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Authenticate validates the JWT Bearer access token from the Authorization header.
 func Authenticate(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -39,7 +38,6 @@ func Authenticate(jwtSecret string) gin.HandlerFunc {
 			return
 		}
 
-		// Inject authenticated claims into Gin Context
 		c.Set("user_id", claims.UserID.String())
 		c.Set("user_uuid", claims.UserID)
 		c.Set("user_email", claims.Email)
