@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// MockUserRepository is a mock implementation of interfaces.UserRepository
 type MockUserRepository struct {
 	mock.Mock
 }
@@ -59,7 +58,6 @@ func (m *MockUserRepository) Create(ctx context.Context, user *models.User) erro
 	return args.Error(0)
 }
 
-// MockRefreshTokenRepository is a mock implementation of interfaces.RefreshTokenRepository
 type MockRefreshTokenRepository struct {
 	mock.Mock
 }
@@ -87,7 +85,6 @@ func (m *MockRefreshTokenRepository) RevokeAllByUserID(ctx context.Context, user
 	return args.Error(0)
 }
 
-// MockProductRepository is a mock implementation of interfaces.ProductRepository
 type MockProductRepository struct {
 	mock.Mock
 }
@@ -108,7 +105,6 @@ func (m *MockProductRepository) FindByID(ctx context.Context, productID string) 
 	return args.Get(0).(*models.Products), args.Error(1)
 }
 
-// MockOrderRepository is a mock implementation of interfaces.OrderRepository
 type MockOrderRepository struct {
 	mock.Mock
 }

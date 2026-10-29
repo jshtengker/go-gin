@@ -27,7 +27,6 @@ func setupTestAuthRouter(mockService *mocks.MockAuthService) *gin.Engine {
 	r.POST("/refresh", handler.RefreshToken)
 	r.POST("/logout", handler.Logout)
 	r.GET("/me", func(c *gin.Context) {
-		// simulate authenticated context if header is provided in test
 		if userID := c.GetHeader("X-Test-User-UUID"); userID != "" {
 			parsed, _ := uuid.Parse(userID)
 			c.Set("user_uuid", parsed)
@@ -74,7 +73,6 @@ func TestAuthHandler_Register_ValidationError(t *testing.T) {
 	mockService := new(mocks.MockAuthService)
 	router := setupTestAuthRouter(mockService)
 
-	// Password too short (<8 chars)
 	invalidPayload := map[string]string{
 		"full_name": "Alice",
 		"username":  "alice",

@@ -21,7 +21,6 @@ func NewAuthHandler(service interfaces.AuthService) *AuthHandler {
 	}
 }
 
-// Register handles new user registration.
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req requests.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -45,7 +44,6 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	helpers.SuccessResponse(c, http.StatusCreated, res, "User registered successfully")
 }
 
-// Login authenticates a user and returns an access & refresh token pair.
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req requests.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -69,7 +67,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	helpers.SuccessResponse(c, http.StatusOK, res, "Login successful")
 }
 
-// RefreshToken rotates the refresh token and returns a new token pair.
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	var req requests.RefreshTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -97,7 +94,6 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	helpers.SuccessResponse(c, http.StatusOK, res, "Token refreshed successfully")
 }
 
-// Logout revokes the provided refresh token in PostgreSQL.
 func (h *AuthHandler) Logout(c *gin.Context) {
 	var req requests.LogoutRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -113,7 +109,6 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	helpers.SuccessResponse(c, http.StatusOK, nil, "Logged out successfully")
 }
 
-// GetProfile returns the authenticated user's profile.
 func (h *AuthHandler) GetProfile(c *gin.Context) {
 	userID, err := helpers.GetAuthUserID(c)
 	if err != nil {

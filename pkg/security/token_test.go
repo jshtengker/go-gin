@@ -35,7 +35,6 @@ func TestAccessTokenGenerationAndValidation(t *testing.T) {
 		t.Errorf("expected Username %s, got %s", username, claims.Username)
 	}
 
-	// Validate with wrong secret
 	_, err = ValidateAccessToken(token, "wrong-secret")
 	if !errors.Is(err, ErrTokenInvalid) {
 		t.Fatalf("expected ErrTokenInvalid when validating with wrong secret, got: %v", err)
@@ -46,7 +45,6 @@ func TestAccessTokenExpired(t *testing.T) {
 	userID := uuid.New()
 	secret := "test-secret-key-12345"
 
-	// Generate an already-expired token
 	token, err := GenerateAccessToken(userID, "test@example.com", "testuser", secret, -1*time.Minute)
 	if err != nil {
 		t.Fatalf("failed to generate expired access token: %v", err)
@@ -68,11 +66,10 @@ func TestRefreshTokenGenerationAndHashing(t *testing.T) {
 		t.Fatal("expected non-empty raw refresh token")
 	}
 
-	if len(tokenHash) != 64 { // SHA-256 hex is 64 characters
+	if len(tokenHash) != 64 {
 		t.Fatalf("expected 64-char sha256 hex hash, got length %d", len(tokenHash))
 	}
 
-	// Verify HashToken produces consistent output
 	computedHash := HashToken(rawToken)
 	if computedHash != tokenHash {
 		t.Fatalf("expected HashToken to produce %s, got %s", tokenHash, computedHash)

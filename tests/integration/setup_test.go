@@ -55,14 +55,11 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-// getProjectRoot returns the absolute path to the backend repository root
 func getProjectRoot() string {
 	_, b, _, _ := runtime.Caller(0)
-	// tests/integration/setup_test.go -> two levels up to root
 	return filepath.Join(filepath.Dir(b), "../..")
 }
 
-// setupIntegrationApp initializes DB, runs migrations, and creates a Gin engine for testing.
 func setupIntegrationApp(t *testing.T) (*gin.Engine, *gorm.DB, *configs.Config) {
 	gin.SetMode(gin.TestMode)
 	logger.Log = zap.NewNop()
@@ -74,7 +71,6 @@ func setupIntegrationApp(t *testing.T) (*gin.Engine, *gorm.DB, *configs.Config) 
 	require.NotEmpty(t, cfg.DBHost, "DB_HOST must be provided in internal/configs/.env")
 	require.NotEmpty(t, cfg.DBName, "DB_NAME must be provided in internal/configs/.env")
 
-	// 1. Run migrations up using golang-migrate
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
@@ -99,11 +95,9 @@ func setupIntegrationApp(t *testing.T) (*gin.Engine, *gorm.DB, *configs.Config) 
 		require.NoError(t, err, "failed to apply migrations in integration test")
 	}
 
-	// 2. Connect via GORM
 	gormDB, err := configs.ConnPostgres(cfg)
 	require.NoError(t, err, "failed to connect to Postgres via GORM")
 
-	// 3. Setup Gin Router
 	engine := router.Setup(cfg, gormDB)
 
 	return engine, gormDB, cfg

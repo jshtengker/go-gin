@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// MockAuthService is a mock implementation of interfaces.AuthService
 type MockAuthService struct {
 	mock.Mock
 }
@@ -51,7 +50,6 @@ func (m *MockAuthService) GetProfile(ctx context.Context, userID string) (*respo
 	return args.Get(0).(*responses.UserResponse), args.Error(1)
 }
 
-// MockUserService is a mock implementation of interfaces.UserService
 type MockUserService struct {
 	mock.Mock
 }
@@ -72,7 +70,6 @@ func (m *MockUserService) GetByID(ctx context.Context, userID string) (*response
 	return args.Get(0).(*responses.UserResponse), args.Error(1)
 }
 
-// MockProductService is a mock implementation of interfaces.ProductService
 type MockProductService struct {
 	mock.Mock
 }
@@ -93,7 +90,6 @@ func (m *MockProductService) GetByID(ctx context.Context, productID string) (*re
 	return args.Get(0).(*responses.ProductResponse), args.Error(1)
 }
 
-// MockOrderService is a mock implementation of interfaces.OrderService
 type MockOrderService struct {
 	mock.Mock
 }

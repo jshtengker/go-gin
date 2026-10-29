@@ -21,6 +21,7 @@
 - Default DB: `127.0.0.1:5433`, user `admin`, pass `admin123`, db `localDB`
 - Auth configs: `JWT_SECRET`, `JWT_EXPIRY_MINUTES`, `REFRESH_TOKEN_SECRET`, `REFRESH_TOKEN_EXPIRY_HOURS`, `REFRESH_TOKEN_GRACE_PERIOD_SECONDS`
 - `SERVER_PORT` env var is defined (defaults to `9001` if omitted)
+- `APP_ENV`: `development` (default, colorful human-readable console logs) or `production` (structured JSON logs)
 
 ## Architecture
 

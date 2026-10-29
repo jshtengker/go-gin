@@ -1,4 +1,3 @@
-// Package helpers
 package helpers
 
 import "github.com/gin-gonic/gin"

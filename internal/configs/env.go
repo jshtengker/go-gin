@@ -8,17 +8,18 @@ import (
 )
 
 type Config struct {
-	ServerPort              string
-	DBHost                  string
-	DBPort                  string
-	DBUser                  string
-	DBPassword              string
-	DBName                  string
-	JWTSecret               string
-	JWTExpiryMinutes        int
-	RefreshTokenSecret              string
-	RefreshTokenExpiryHours         int
-	RefreshTokenGracePeriodSeconds  int
+	AppEnv                         string
+	ServerPort                     string
+	DBHost                         string
+	DBPort                         string
+	DBUser                         string
+	DBPassword                     string
+	DBName                         string
+	JWTSecret                      string
+	JWTExpiryMinutes               int
+	RefreshTokenSecret             string
+	RefreshTokenExpiryHours        int
+	RefreshTokenGracePeriodSeconds int
 }
 
 func LoadEnv() {
@@ -26,6 +27,11 @@ func LoadEnv() {
 }
 
 func Load() *Config {
+	appEnv := os.Getenv("APP_ENV")
+	if appEnv == "" {
+		appEnv = "development"
+	}
+
 	jwtExpiry := 15
 	if val, err := strconv.Atoi(os.Getenv("JWT_EXPIRY_MINUTES")); err == nil && val > 0 {
 		jwtExpiry = val
@@ -52,6 +58,7 @@ func Load() *Config {
 	}
 
 	return &Config{
+		AppEnv:                         appEnv,
 		ServerPort:                     os.Getenv("SERVER_PORT"),
 		DBHost:                         os.Getenv("DB_HOST"),
 		DBPort:                         os.Getenv("DB_PORT"),

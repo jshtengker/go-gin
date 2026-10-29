@@ -34,21 +34,18 @@ func NewAuthService(
 }
 
 func (s *AuthService) Register(ctx context.Context, req requests.RegisterRequest) (*responses.AuthResponse, error) {
-	// Check if email already exists
 	if _, err := s.userRepo.FindByEmail(ctx, req.Email); err == nil {
 		return nil, apperrors.ErrEmailAlreadyExists
 	} else if !errors.Is(err, apperrors.ErrNotFound) {
 		return nil, err
 	}
 
-	// Check if username already exists
 	if _, err := s.userRepo.FindByUsername(ctx, req.Username); err == nil {
 		return nil, apperrors.ErrUsernameAlreadyExists
 	} else if !errors.Is(err, apperrors.ErrNotFound) {
 		return nil, err
 	}
 
-	// Hash password
 	passwordHash, err := security.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
@@ -106,12 +103,10 @@ func (s *AuthService) RefreshToken(ctx context.Context, req requests.RefreshToke
 		return nil, err
 	}
 
-	// Check expiration
 	if time.Now().UTC().After(tokenRecord.ExpiresAt) {
 		return nil, apperrors.ErrTokenExpired
 	}
 
-	// Verify user is still active
 	user, err := s.userRepo.FindByID(ctx, tokenRecord.UserID.String())
 	if err != nil {
 		return nil, apperrors.ErrInvalidToken
@@ -121,7 +116,6 @@ func (s *AuthService) RefreshToken(ctx context.Context, req requests.RefreshToke
 		return nil, apperrors.ErrUserInactive
 	}
 
-	// Revocation & Grace Period Handling
 	if tokenRecord.IsRevoked {
 		revocationReason := ""
 		if tokenRecord.RevocationReason != nil {
@@ -140,26 +134,22 @@ func (s *AuthService) RefreshToken(ctx context.Context, req requests.RefreshToke
 			revokedTime = tokenRecord.UpdatedAt
 		}
 
-		// If revoked due to token rotation and within grace period:
-		// allow issuing a fresh token pair to handle concurrent frontend requests gracefully.
+		// Grace period absorbs concurrent frontend requests without prematurely invalidating the session.
 		if revocationReason == "rotated" && time.Now().UTC().Sub(revokedTime) <= gracePeriod {
 			return s.issueTokens(ctx, user)
 		}
 
-		// Past grace period or explicit logout:
-		// Genuine reuse attack -> revoke all active sessions for this user!
+		// Replay past grace period indicates reuse/theft attack; revoke all active sessions to contain breach.
 		if revocationReason == "rotated" {
 			_ = s.tokenRepo.RevokeAllByUserID(ctx, tokenRecord.UserID, "reuse_attack_detected")
 		}
 		return nil, apperrors.ErrTokenRevoked
 	}
 
-	// Invalidate the old refresh token (single-use rotation)
 	if err := s.tokenRepo.Revoke(ctx, tokenHash, "rotated"); err != nil {
 		return nil, err
 	}
 
-	// Issue fresh token pair
 	return s.issueTokens(ctx, user)
 }
 
@@ -177,7 +167,6 @@ func (s *AuthService) GetProfile(ctx context.Context, userID string) (*responses
 	return responses.ToUserResponse(user), nil
 }
 
-// issueTokens generates a new Access Token and a new Refresh Token in PostgreSQL.
 func (s *AuthService) issueTokens(ctx context.Context, user *models.User) (*responses.AuthResponse, error) {
 	accessExpiry := time.Duration(s.cfg.JWTExpiryMinutes) * time.Minute
 	accessToken, err := security.GenerateAccessToken(

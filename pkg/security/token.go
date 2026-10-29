@@ -24,7 +24,6 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-// GenerateAccessToken creates a signed JWT access token.
 func GenerateAccessToken(userID uuid.UUID, email, username, secret string, expiry time.Duration) (string, error) {
 	now := time.Now().UTC()
 	claims := JWTClaims{
@@ -48,7 +47,6 @@ func GenerateAccessToken(userID uuid.UUID, email, username, secret string, expir
 	return signedToken, nil
 }
 
-// ValidateAccessToken parses and validates a JWT access token.
 func ValidateAccessToken(tokenStr, secret string) (*JWTClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
@@ -76,7 +74,6 @@ func ValidateAccessToken(tokenStr, secret string) (*JWTClaims, error) {
 	return claims, nil
 }
 
-// GenerateRefreshToken generates a secure random 32-byte hex-encoded string and its SHA-256 hash.
 func GenerateRefreshToken() (rawToken string, tokenHash string, err error) {
 	bytes := make([]byte, 32)
 	if _, err := rand.Read(bytes); err != nil {
@@ -88,7 +85,6 @@ func GenerateRefreshToken() (rawToken string, tokenHash string, err error) {
 	return rawToken, tokenHash, nil
 }
 
-// HashToken generates a SHA-256 hex hash of the given raw token string.
 func HashToken(token string) string {
 	hash := sha256.Sum256([]byte(token))
 	return hex.EncodeToString(hash[:])

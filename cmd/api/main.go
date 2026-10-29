@@ -16,11 +16,11 @@ import (
 )
 
 func main() {
-	log := logger.Init()
-	defer logger.Sync()
-
 	configs.LoadEnv()
 	cfg := configs.Load()
+
+	log := logger.Init(cfg.AppEnv)
+	defer logger.Sync()
 
 	db, err := configs.ConnPostgres(cfg)
 	if err != nil {
@@ -43,7 +43,6 @@ func main() {
 		IdleTimeout:  60 * time.Second,
 	}
 
-	// Run server in a background goroutine
 	go func() {
 		log.Info("server starting", zap.String("port", port))
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -51,7 +50,6 @@ func main() {
 		}
 	}()
 
-	// Listen for OS interrupt or termination signals for graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
